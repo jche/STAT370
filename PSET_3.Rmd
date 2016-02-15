@@ -1,23 +1,184 @@
 ---
 title: 'Problem Set #3 - Florence'
-author: "Jonathan Che"
+author: "Azka, Jonathan, Jordan"
 date: "Monday, February 15, 2016"
-output: html_document
+output: pdf_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r, include=FALSE}
+library(mosaic)
+```
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# Problem 10.6
+Various chemical tests were conducted on beeswax. In particular, the percentage of hydrocarbons in each sample of wax was determined.
+
+## Part (a)
+Plot the ecdf, the histogram, and a normal probability plot of the percentages of hydrocarbons. Find the .90, .75, .50, .25, and .10 quantiles. Does the distribution appear Gaussian?
 
 ```{r}
-summary(cars)
-#Azka
+beeswax <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/beeswax.csv")
+hcarb <- beeswax$Hydrocarbon
+
+hcarb.ecdf <- ecdf(hcarb)
+plot(hcarb.ecdf)
+histogram(hcarb)
 ```
 
-You can also embed plots, for example:
-
-```{r, echo=FALSE}
-plot(cars)
+```{r, fig.keep='last'}
+qqnorm(hcarb)
+qqline(hcarb)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+quantile(hcarb, c(.90, .75, .50, .25, .10))
+```
+
+The distribution does appear Gaussian.
+
+## Part (b)
+The average percentage of hydrocarbons in microcrystalline wax (a synthetic commercial wax) is 85%. Suppose that beeswax was diluted with 1% microcrystalline wax. Could this be detected? What about a 3% or a 5% dilution?
+
+```{r, fig.keep='none'}
+synth.01 <- sample(hcarb, 1)*.99 + 85*.01; synth.01
+synth.03 <- sample(hcarb, 1)*.97 + 85*.03; synth.03
+synth.05 <- sample(hcarb, 1)*.95 + 85*.05; synth.05
+
+hcarb.synth <- append(hcarb, c(synth.01, synth.03, synth.05))
+qqnorm(hcarb.synth, col = ifelse(hcarb.synth == synth.01 |
+                                 hcarb.synth == synth.03 |
+                                 hcarb.synth == synth.05, 
+                                 "red", "gray"))
+qqline(hcarb.synth)
+```
+
+As the plot shows, a 5% dilution should be quite detectable. A 1% or 3% dilution, though, would be more difficult to detect.
+
+# Problem 10.10
+
+## Part (a)
+
+Sample n from runif(0,1). Do this numsim times. For each of numsim trials, pick some arbitrary order statistic k to analyze. Show that the mean and variance of this kth order statistic match the given formulas.
+
+## Part (b)
+
+Sample n from distribution with known cdf F. Do this numsim times. For each of numsim trials, pick some arbitrary order statistic k to analyze. Show that the mean and variance of this kth order statistic match the given formulas.
+
+## Part (c)
+
+Select some arbitrary pth quantile. For the numsim samples in part (b), show that the variance of the pth quantile is the given formula.
+
+## Part (d)
+
+Sample n from rnorm with some arbitrary mean and standard deviation. Do this numsim times. Find the variance of the median, and match it to the derived formula. Find the variance of the mean, and match it to the formula for the variance of the sample mean.
+
+# Problem 10.28
+
+Sample 3 from some continuous probability distribution (with a known median) and check how often the conditions are met.
+
+# Problem 10.50
+
+```{r, include=FALSE}
+flow <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/flow-occ.csv")
+```
+
+## Part (a)
+For each station, plot flow and occupancy versus time. Explain the patterns you see. Can you deduce from the plots what the days of the week were?
+
+```{r, fig.keep='none'}
+p1 = xyplot(Lane.1.Flow ~ Timestamp, data=flow)
+p2 = xyplot(Lane.1.Occ ~ Timestamp, data=flow)
+print(p1, position = c(0, 0.5, 1, 1), more = TRUE)
+print(p2, position = c(0, 0, 1, 0.5))
+```
+
+```{r, fig.keep='none'}
+p3 = xyplot(Lane.2.Flow ~ Timestamp, data=flow)
+p4 = xyplot(Lane.2.Occ ~ Timestamp, data=flow)
+print(p3, position = c(0, 0.5, 1, 1), more = TRUE)
+print(p4, position = c(0, 0, 1, 0.5))
+```
+
+```{r, fig.keep='none'}
+p5 = xyplot(Lane.3.Flow ~ Timestamp, data=flow)
+p6 = xyplot(Lane.3.Occ ~ Timestamp, data=flow)
+print(p5, position = c(0, 0.5, 1, 1), more = TRUE)
+print(p6, position = c(0, 0, 1, 0.5))
+```
+
+There is a sin-curve-like pattern to the plots. The second and third "bumps" look to be slightly less variable than the other bumps, so the days of the week could be Friday, Saturday, Sunday, Monday, Tuesday, Wednesday.
+
+## Part (b)
+Compare the flows in the three lanes by making parallel boxplots. Which lane typically serves the most traffic?
+
+```{r, fig.keep='none'}
+boxplot(flow$Lane.1.Flow, flow$Lane.2.Flow, flow$Lane.3.Flow, names = c("Lane 1", "Lane 2", "Lane 3"))
+```
+
+Lane 2 typically serves the most traffic.
+
+## Part (c)
+
+```{r, fig.keep='none'}
+xyplot(Lane.1.Flow + Lane.2.Flow + Lane.3.Flow ~ Timestamp, data=flow, auto.key = TRUE)
+```
+
+The flow in lane 2 looks to typically be greater than the flow in lane 1, which looks to typically by greater than the flow in lane 3.
+
+## Part (d)
+
+```{r}
+mean(flow$Lane.1.Occ); median(flow$Lane.1.Occ)
+mean(flow$Lane.2.Occ); median(flow$Lane.2.Occ)
+mean(flow$Lane.3.Occ); median(flow$Lane.3.Occ)
+```
+
+In all three lanes, the medians are less than the means. This suggests that the data are skewed right, with some high-valued outliers that increase the mean.
+
+## Part (e)
+
+```{r, fig.keep='none'}
+histogram(flow$Lane.1.Occ, breaks = 10)
+histogram(flow$Lane.1.Occ, breaks = 20)
+
+histogram(flow$Lane.2.Occ, breaks = 10)
+histogram(flow$Lane.2.Occ, breaks = 20)
+
+histogram(flow$Lane.3.Occ, breaks = 10)
+histogram(flow$Lane.3.Occ, breaks = 20)
+```
+
+20 bins looks to give a good representation of the shape of the distribution (skewed right, slightly bimodal). The bimodal nature can be explained by rush hours. Most of the time, when traffic is light, cars do not occupy the same area for very long. Sometimes, though, when traffic is heavy, cars tend to occupy the same area for longer times.
+
+## Part (f)
+
+```{r, fig.keep='none'}
+xyplot(Lane.1.Occ + Lane.2.Occ + Lane.3.Occ ~ Timestamp, data=flow, auto.key = TRUE)
+```
+
+From this plot, we can tell that all 3 lanes tend to have high occupancies at around the same times.
+
+## Part (g)
+
+```{r, fig.keep='none'}
+xyplot(Lane.1.Flow ~ Lane.1.Occ, data = flow)
+xyplot(Lane.2.Flow ~ Lane.2.Occ, data = flow)
+xyplot(Lane.3.Flow ~ Lane.3.Occ, data = flow)
+```
+
+The first part of the conjecture seems plausible. When occupancy is low, it tends to increase with flow. Beyond a certain point (around Occ=0.2), however, flow begins to decrease with greater occupancy.
+
+## Part (h)
+
+## Part (i)
+
+## Part (j)
+
+## Part (k)
+
+### Section i
+
+### Section ii
+
+### Section iii
+
+## Part (l)
