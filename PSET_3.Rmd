@@ -56,12 +56,43 @@ As the plot shows, a 5% dilution should be quite detectable. A 1% or 3% dilution
 # Problem 10.10
 
 ## Part (a)
+Find the mean and variance of $X_(k)$ from a uniform distribution on [0,1].
 
-Sample n from runif(0,1). Do this numsim times. For each of numsim trials, pick some arbitrary order statistic k to analyze. Show that the mean and variance of this kth order statistic match the given formulas.
+```{r}
+numsim <- 10000
+
+n <- 100 # Number of elements in each sample
+k <- 17 # Arbitrary order statistic to examine
+
+getOrderStat <- function(){
+  x <- runif(n, 0, 1)
+  return(sort(x)[k])
+}
+
+vals <- do(numsim)*getOrderStat()
+mean(vals[,1]); k/(n+1)
+var(vals[,1]); (1/(n+2))*(k/(n+1))*(1-k/(n+1))
+```
 
 ## Part (b)
+Find the approximate mean and variance of $Y_(k)$ from an arbitrary distribution with cdf F.
 
-Sample n from distribution with known cdf F. Do this numsim times. For each of numsim trials, pick some arbitrary order statistic k to analyze. Show that the mean and variance of this kth order statistic match the given formulas.
+We use an exponential distribution with rate parameter 1:
+
+```{r, tidy=TRUE}
+n <- 100 # Number of elements in each sample
+k <- 24 # Arbitrary order statistic to examine
+lambda <- 1
+
+getOrderStat <- function(){
+  x <- rexp(n, rate = lambda)
+  return(sort(x)[k])
+}
+
+vals <- do(numsim)*getOrderStat()
+mean(vals[,1]); (-1/lambda)*log(1-k/(n+1))
+var(vals[,1]); (k/(n+1))*(1-k/(n+1))*(1/(n+2))*(1/(lambda*exp(-lambda*((-1/lambda)*log(1-k/(n+1)))))^2)
+```
 
 ## Part (c)
 
