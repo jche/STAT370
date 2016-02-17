@@ -39,16 +39,16 @@ The distribution does appear Gaussian.
 The average percentage of hydrocarbons in microcrystalline wax (a synthetic commercial wax) is 85%. Suppose that beeswax was diluted with 1% microcrystalline wax. Could this be detected? What about a 3% or a 5% dilution?
 
 ```{r, fig.keep='none'}
-synth.01 <- sample(hcarb, 1)*.99 + 85*.01; synth.01
-synth.03 <- sample(hcarb, 1)*.97 + 85*.03; synth.03
-synth.05 <- sample(hcarb, 1)*.95 + 85*.05; synth.05
-
-hcarb.synth <- append(hcarb, c(synth.01, synth.03, synth.05))
-qqnorm(hcarb.synth, col = ifelse(hcarb.synth == synth.01 |
-                                 hcarb.synth == synth.03 |
-                                 hcarb.synth == synth.05, 
-                                 "red", "gray"))
-qqline(hcarb.synth)
+undiluted <- hist(hcarb)
+synth.01 <- hist(hcarb*.99 + 85*.01)
+synth.03 <- hist(hcarb*.97 + 85*.03)
+synth.05 <- hist(hcarb*.95 + 85*.05)
+```
+```{r, fig.keep='last'}
+plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
+plot(synth.01, col=rgb(1,0,0,1/4), xlim=c(11, 21), add = TRUE)
+plot(synth.03, col=rgb(0,1,0,1/4), xlim=c(11, 21), add = TRUE)
+plot(synth.05, col=rgb(1,1,0,1/4), xlim=c(11, 21), add = TRUE)
 ```
 
 As the plot shows, a 5% dilution should be quite detectable. A 1% or 3% dilution, though, would be more difficult to detect.
@@ -61,8 +61,8 @@ Find the mean and variance of $X_(k)$ from a uniform distribution on [0,1].
 ```{r}
 numsim <- 10000
 
-n <- 100 # Number of elements in each sample
-k <- 17 # Arbitrary order statistic to examine
+n <- 99 # Number of elements in each sample
+k <- 50 # Arbitrary order statistic to examine; here we use median
 
 getOrderStat <- function(){
   x <- runif(n, 0, 1)
@@ -80,8 +80,8 @@ Find the approximate mean and variance of $Y_(k)$ from an arbitrary distribution
 We use an exponential distribution with rate parameter 1:
 
 ```{r, tidy=TRUE}
-n <- 100 # Number of elements in each sample
-k <- 24 # Arbitrary order statistic to examine
+n <- 99 # Number of elements in each sample
+k <- 50 # Arbitrary order statistic to examine; here we use median
 lambda <- 1
 
 getOrderStat <- function(){
@@ -104,7 +104,11 @@ Sample n from rnorm with some arbitrary mean and standard deviation. Do this num
 
 # Problem 10.28
 
-Sample 3 from some continuous probability distribution (with a known median) and check how often the conditions are met.
+We use a standard Normal as our continuous probability distribution. So, the median = 0.
+
+```{r}
+# Insert Jordan's simulation
+```
 
 # Problem 10.50
 
