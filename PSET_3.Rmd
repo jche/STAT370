@@ -38,6 +38,8 @@ The distribution does appear Gaussian.
 ## Part (b)
 The average percentage of hydrocarbons in microcrystalline wax (a synthetic commercial wax) is 85%. Suppose that beeswax was diluted with 1% microcrystalline wax. Could this be detected? What about a 3% or a 5% dilution?
 
+To help illustrate these dilutions, we plot histograms of the original beeswax compared to histograms of the diluted beeswaxes.
+
 ```{r, fig.keep='none'}
 undiluted <- hist(hcarb)
 synth.01 <- hist(hcarb*.99 + 85*.01)
@@ -47,11 +49,23 @@ synth.05 <- hist(hcarb*.95 + 85*.05)
 ```{r, fig.keep='last'}
 plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
 plot(synth.01, col=rgb(1,0,0,1/4), xlim=c(11, 21), add = TRUE)
+```
+
+As the histograms above show, it would be difficult to detect a 1% dilution.
+
+```{r, fig.keep='last'}
+plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
 plot(synth.03, col=rgb(0,1,0,1/4), xlim=c(11, 21), add = TRUE)
+```
+
+As the histograms above show, it would not be too difficult to detect a 3% dilution.
+
+```{r, fig.keep='last'}
+plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
 plot(synth.05, col=rgb(1,1,0,1/4), xlim=c(11, 21), add = TRUE)
 ```
 
-As the plot shows, a 5% dilution should be quite detectable. A 1% or 3% dilution, though, would be more difficult to detect.
+As the histograms above show, it would be relatively easy to detect a 5% dilution.
 
 # Problem 10.10
 
@@ -70,9 +84,11 @@ getOrderStat <- function(){
 }
 
 vals <- do(numsim)*getOrderStat()
-mean(vals[,1]); k/(n+1)
+confint(t.test(~vals[,1])); k/(n+1)
 var(vals[,1]); (1/(n+2))*(k/(n+1))*(1-k/(n+1))
 ```
+
+We note that the calculated mean lies within the confidence interval for the value of the empirical mean. Also, the calculated and empirical variances are essentially equal.
 
 ## Part (b)
 Find the approximate mean and variance of $Y_(k)$ from an arbitrary distribution with cdf F.
@@ -84,23 +100,60 @@ n <- 99 # Number of elements in each sample
 k <- 50 # Arbitrary order statistic to examine; here we use median
 lambda <- 1
 
-getOrderStat <- function(){
+getOrderStatExp <- function(){
   x <- rexp(n, rate = lambda)
   return(sort(x)[k])
 }
 
-vals <- do(numsim)*getOrderStat()
-mean(vals[,1]); (-1/lambda)*log(1-k/(n+1))
-var(vals[,1]); (k/(n+1))*(1-k/(n+1))*(1/(n+2))*(1/(lambda*exp(-lambda*((-1/lambda)*log(1-k/(n+1)))))^2)
+vals <- do(numsim)*getOrderStatExp()
+confint(t.test(vals[,1])); (-1/lambda)*log(1-k/(n+1))
+var(vals[,1]); (k/(n+1))*(1-k/(n+1))*(1/(n+2))*(1/(dexp((-1/lambda)*log(1-k/(n+1)), rate=lambda))^2)
 ```
+
+We note that the calculated mean lies within the confidence interval for the value of the empirical mean. Also, the calculated and empirical variances are essentially equal.
 
 ## Part (c)
 
-Select some arbitrary pth quantile. For the numsim samples in part (b), show that the variance of the pth quantile is the given formula.
+The median is the .5th sample quantile, so the variance of the median (as calculated in part (b)) should be approximately:
+
+```{r}
+p <- .5 # median is .5th sample quantile
+
+# Note: median of exponential with rate parameter 1 = ln(2)
+p*(1-p)/(n*(lambda*exp(-lambda*log(2)))^2); var(vals[,1])
+# Or: p*(1-p)/(n*(dexp(log(2), rate=lambda))^2); var(vals[,1])
+```
+
+This approximation is very good as well.
 
 ## Part (d)
+Find the approximate variance of the median of a sample of size n from a $N(\mu,\sigma^2)$ distribution. Compare this variance to the variance of the sample mean.
 
-Sample n from rnorm with some arbitrary mean and standard deviation. Do this numsim times. Find the variance of the median, and match it to the derived formula. Find the variance of the mean, and match it to the formula for the variance of the sample mean.
+```{r}
+numsim <- 10000
+
+n <- 99 # Number of elements in each sample
+k <- 50 # Arbitrary order statistic to examine; here we use median
+mean <- 2
+sd <- 1
+p <- .5 # median is .5th sample quantile
+
+getOrderStatNorm <- function(){
+  x <- rnorm(n, mean = mean, sd = sd)
+  return(sort(x)[k])
+}
+medVals <- do(numsim)*getOrderStatNorm()
+var(medVals[,1]); p*(1-p)/(n*(dnorm(mean, mean=mean, sd=sd))^2) # For Normal, median = mean
+
+getMeanNorm <- function(){
+  x <- rnorm(n, mean = mean, sd = sd)
+  return(mean(x))
+}
+meanVals <- do(numsim)*getMeanNorm()
+var(meanVals[,1]); sd^2/n
+```
+
+We notice that the variance of the sample median is greater than the variance of the sample mean.
 
 # Problem 10.28
 
