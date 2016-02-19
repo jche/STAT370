@@ -49,119 +49,113 @@ synth.05 <- hist(hcarb*.95 + 85*.05)
 ```{r, fig.keep='last'}
 plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
 plot(synth.01, col=rgb(1,0,0,1/4), xlim=c(11, 21), add = TRUE)
+(mean(hcarb*.99 + 85*.01) - mean(hcarb))
 ```
 
-As the histograms above show, it would be difficult to detect a 1% dilution.
+If we examine the mean of the 1% dilutions, we notice that it is only .70 standard deviations away from the mean of the originals, i.e. within 1 standard deviation of the original mean. As the histograms above show, it would be difficult to detect a 1% dilution. 
 
 ```{r, fig.keep='last'}
 plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
 plot(synth.03, col=rgb(0,1,0,1/4), xlim=c(11, 21), add = TRUE)
+(mean(hcarb*.97 + 85*.03) - mean(hcarb))
 ```
 
-As the histograms above show, it would not be too difficult to detect a 3% dilution.
+If we examine the mean of the 3% dilutions, we notice that it is 2.11 standard deviations away from the mean of the originals, which is not much more than 2 standard deviations. As the histograms above show, it would be somewhat difficult to detect a 3% dilution.
 
 ```{r, fig.keep='last'}
 plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
 plot(synth.05, col=rgb(1,1,0,1/4), xlim=c(11, 21), add = TRUE)
+(mean(hcarb*.95 + 85*.05) - mean(hcarb))
 ```
 
-As the histograms above show, it would be relatively easy to detect a 5% dilution.
+If we examine the mean of the 5% dilutions, we notice that it is 3.52 standard deviations away from the mean of the originals, which is more than 3 standard deviations away from the original mean. As the histograms above show, it would be relatively easy to detect a 5% dilution.
 
 # Problem 10.10
 
-## Part (a)
-Find the mean and variance of $X_(k)$ from a uniform distribution on [0,1].
+Let's take a sample of size $n$ from a Normal distribution with mean $\mu$ and standard deviation $\sigma$. We want to determine the variance of the sample median and compare it to the variance of the sample mean.
+
+To make life easy, let's use $n = 99$, $\mu = 0$, and $\sigma = 1$. We will simulate draws of size 99 from a Normal(0,1) and examine the sample medians and means (This is part (d)).
 
 ```{r}
 numsim <- 10000
 
 n <- 99 # Number of elements in each sample
-k <- 50 # Arbitrary order statistic to examine; here we use median
-
-getOrderStat <- function(){
-  x <- runif(n, 0, 1)
-  return(sort(x)[k])
-}
-
-vals <- do(numsim)*getOrderStat()
-confint(t.test(~vals[,1])); k/(n+1)
-var(vals[,1]); (1/(n+2))*(k/(n+1))*(1-k/(n+1))
-```
-
-We note that the calculated mean lies within the confidence interval for the value of the empirical mean. Also, the calculated and empirical variances are essentially equal.
-
-## Part (b)
-Find the approximate mean and variance of $Y_(k)$ from an arbitrary distribution with cdf F.
-
-We use an exponential distribution with rate parameter 1:
-
-```{r, tidy=TRUE}
-n <- 99 # Number of elements in each sample
-k <- 50 # Arbitrary order statistic to examine; here we use median
-lambda <- 1
-
-getOrderStatExp <- function(){
-  x <- rexp(n, rate = lambda)
-  return(sort(x)[k])
-}
-
-vals <- do(numsim)*getOrderStatExp()
-confint(t.test(vals[,1])); (-1/lambda)*log(1-k/(n+1))
-var(vals[,1]); (k/(n+1))*(1-k/(n+1))*(1/(n+2))*(1/(dexp((-1/lambda)*log(1-k/(n+1)), rate=lambda))^2)
-```
-
-We note that the calculated mean lies within the confidence interval for the value of the empirical mean. Also, the calculated and empirical variances are essentially equal.
-
-## Part (c)
-
-The median is the .5th sample quantile, so the variance of the median (as calculated in part (b)) should be approximately:
-
-```{r}
-p <- .5 # median is .5th sample quantile
-
-# Note: median of exponential with rate parameter 1 = ln(2)
-p*(1-p)/(n*(lambda*exp(-lambda*log(2)))^2); var(vals[,1])
-# Or: p*(1-p)/(n*(dexp(log(2), rate=lambda))^2); var(vals[,1])
-```
-
-This approximation is very good as well.
-
-## Part (d)
-Find the approximate variance of the median of a sample of size n from a $N(\mu,\sigma^2)$ distribution. Compare this variance to the variance of the sample mean.
-
-```{r}
-numsim <- 10000
-
-n <- 99 # Number of elements in each sample
-k <- 50 # Arbitrary order statistic to examine; here we use median
-mean <- 2
+mean <- 0
 sd <- 1
-p <- .5 # median is .5th sample quantile
 
-getOrderStatNorm <- function(){
-  x <- rnorm(n, mean = mean, sd = sd)
-  return(sort(x)[k])
-}
-medVals <- do(numsim)*getOrderStatNorm()
-var(medVals[,1]); p*(1-p)/(n*(dnorm(mean, mean=mean, sd=sd))^2) # For Normal, median = mean
-
-getMeanNorm <- function(){
-  x <- rnorm(n, mean = mean, sd = sd)
-  return(mean(x))
-}
-meanVals <- do(numsim)*getMeanNorm()
-var(meanVals[,1]); sd^2/n
+medVals <- do(numsim)*median(rnorm(n, mean = mean, sd = sd))
+var(medVals[,1])
 ```
 
-We notice that the variance of the sample median is greater than the variance of the sample mean.
+So, the variance of the sample median is `r var(medVals[,1])`.
+
+```{r}
+meanVals <- do(numsim)*mean(rnorm(n, mean = mean, sd = sd))
+var(meanVals[,1])
+```
+
+So, the variance of the sample means is `r var(meanVals[,1])`.
+
+If we look at the ratio between the variances, we get `r var(medVals[,1])/var(meanVals[,1])`, which looks suspiciously like $\frac{\pi}{2} \approx 1.571$. In fact, it is $\frac{\pi}{2}$, as we will show with the following (heavily simplified) analytical excursion.
+
+To find the analytical ratio between the variance of the sample median and the sample mean, we first need to find the actual variances of the sample median and the sample mean. Rice gives us a formula for the approximate variance of the kth order statistic (see part (b)). If we plug in k = 50 for the median of a sample of n = 99, we get:
+
+$$Var(Y_{50}) \approx \frac{1}{2}(1-\frac{1}{2}) (\frac{1}{f (F^{-1}(\frac{1}{2}))^{2}}) (\frac{1}{101})$$
+
+Because we are using a Normal(0,1), we know that $F^{-1}(1/2)$ is just the mean, which is just the median (See part (a) for more generality). So, we can just substitute in $\mu = 0$.
+
+$$Var(Y_{50}) \approx \frac{1}{2}(1-\frac{1}{2}) (\frac{1}{f (0)^{2}}) (\frac{1}{101})$$
+
+Now, we evaluate the pdf of the Normal(0,1) at 0.
+
+<Insert Latex, probably just original gaussian and final solution>
+
+So, we have found the variance of the median to be $\frac{\pi}{2n}$.
+
+From Rice (page 207), we know that the variance of the sample mean is $\frac{\sigma^2}{n}$, which for us is just $\frac{1}{n}$. Thus, the ratio of the variance of the sample median to the variance of the sample mean is just $\frac{\pi}{2}$.
 
 # Problem 10.28
 
-We use a standard Normal as our continuous probability distribution. So, the median = 0.
+For a sample of size n = 3, median = $\eta$, we know that:
+$$P(x_{1} < \eta < x_{2}) = 1 - P(\eta < x_{1}) - P(\eta > x_{2})$$
+$$ = 1 - P(0~observations~less~than~\eta) - P(0~observations~greater~than~\eta) - P(1~observation~greater~than~\eta)$$
 
+Using binomial distributions with p = .5 (since the probability that any random observation is greater than or less than the median is .5), we get:
+$$P(x_{1} < \eta < x_{2})  = 1 - \frac{1}{8} - \frac{1}{8} - \frac{3}{8} = \frac{3}{8}$$
+
+Empirically, we use a standard Normal as our continuous probability distribution. So, the median = 0. 
 ```{r}
-# Insert Jordan's simulation
+isBetween12 <- function() {
+  sample <- rnorm(3, 0, 1)
+  order1 <- min(sample)
+  order2 <- median(sample) 
+  return(order1<0 & order2>0)
+}
+x <- do(10000) * isBetween12()
+tally(~x, format='prop')
 ```
+
+We get an empirical solution of about $\frac{3}{8}$.
+
+For the second part:
+$$P(x_{1} < \eta < x_{3}) = 1 - P(\eta < x_{1}) - P(\eta > x_{3})$$
+$$ = 1 - P(0~observations~less~than~\eta) - P(0~observations~greater~than~\eta)$$
+
+Again using binomial distributions with p = .5, we get:
+$$P(x_{1} < \eta < x_{2})  = 1 - \frac{1}{8} - \frac{1}{8} = \frac{6}{8} = \frac{3}{4}$$
+
+Empirically, we use a standard Normal again (median = 0).
+```{r}
+isBetween13 <- function() { 
+  sample <- rnorm(3, 0, 1)
+  order1 <- min(sample)
+  order3 <- max(sample)
+  return(order1<0 & order3>0)
+}
+x <- do(10000) * isBetween13()
+tally(~x, format='prop')
+```
+We get an empirical solution of about $\frac{3}{4}$.
 
 # Problem 10.50
 
@@ -254,19 +248,3 @@ xyplot(Lane.3.Flow ~ Lane.3.Occ, data = flow)
 ```
 
 The first part of the conjecture seems plausible. When occupancy is low, it tends to increase with flow. Beyond a certain point (around Occ=0.2), however, flow begins to decrease with greater occupancy.
-
-## Part (h)
-
-## Part (i)
-
-## Part (j)
-
-## Part (k)
-
-### Section i
-
-### Section ii
-
-### Section iii
-
-## Part (l)
