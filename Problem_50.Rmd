@@ -26,27 +26,35 @@ flow <- mutate(flow, Lane.1.Vel = Lane.1.Flow / Lane.1.Occ,
                Lane.3.Vel = Lane.3.Flow / Lane.3.Occ)
 ```
 
-The claim says that initially, when only a few cars are on the road, increasing occupancy does not affect the average velocity. After a certain point, however, increasing the occupancy will end up decreasing the average velocity.
+We examined a dataset that contains information from a sensor on eastbound Interstate 80 in California from March 14-20, 2003. The dataset recorded the flow (number of cars that passed by the sensor) and the occupancy (percent time the sensor was covered) on the three lanes of the interstate, in five-minute intervals. There are 1740 five-minute intervals in total. Lane 1 is located farthest to the left, lane 2 is in the center, and lane 3 is farthest to the right. 
 
-The graphs below show that Velocity* remains about constant until the red lines, at which point they begin to decrease with Occupancy. So, the above claim holds true.
+One observer claims that initially, when only a few cars are on the road, increasing occupancy does not affect the average velocity. After a certain point, however, the observer claims that increasing the occupancy will end up decreasing the average velocity.
+
+The graphs below show that the Velocities* remains about constant until the red lines, at which point they begin to decrease with Occupancy. So, the observer's claim holds true.
 
 ```{r, echo=FALSE, fig.height=6}
 par(mfrow=c(3,1))
-plot(Lane.1.Vel ~ Lane.1.Occ, data=flow)
+plot(Lane.1.Vel ~ Lane.1.Occ, xlim = c(0,0.5), 
+     xlab = "Lane 1 Occupancy", 
+     ylab = "Velocity", data=flow)
 abline(v = .15, col = "red")
-plot(Lane.2.Vel ~ Lane.2.Occ, data=flow)
+plot(Lane.2.Vel ~ Lane.2.Occ, xlim = c(0,0.5), 
+     xlab = "Lane 2 Occupancy", 
+     ylab = "Velocity", data=flow)
 abline(v = .1, col = "red")
-plot(Lane.3.Vel ~ Lane.3.Occ, data=flow)
+plot(Lane.3.Vel ~ Lane.3.Occ, xlim = c(0,0.5), 
+     xlab = "Lane 3 Occupancy", 
+     ylab = "Velocity", data=flow)
 abline(v = .1, col = "red")
 ```
 
 If we look at the three plots, we notice that it takes a greater Occupancy for the average velocity of Lane 1 to begin to decrease (.15 as opposed to .1 for Lanes 2 and 3). This is because Lane 1 is the lane that is the farthest to the left, i.e. the passing lane.
 
-Next, the given claim says that even though Velocity begins to decrease with Occupancy after a certain point, the increase in total cars means that the flow still continues to increase. 
+Next, the observer claims that even though Velocity begins to decrease with Occupancy after a certain point, the increase in total cars means that the flow still continues to increase. 
 
 To check this claim, we plot Flow against Occupancy, noting the Occupancy values at which Velocity begins to decrease with Occupancy.
 
-```{r, echo=FALSE, fig.height=6.5}
+```{r, echo=FALSE, fig.height=6}
 par(mfrow=c(3,1))
 plot(Lane.1.Flow ~ Lane.1.Occ, data=flow)
 abline(v = .15, col = "red")
@@ -56,8 +64,7 @@ plot(Lane.3.Flow ~ Lane.3.Occ, data=flow)
 abline(v = .1, col = "red")
 ```
 
-We notice that at the critical Occupancies (the Occupancies at which Velocity begins to decrease), the Flow begins to decrease as well. As such, the claim here is false. When Velocity begins to decrase with Occupancy, the increase in total cars does not outweigh the decrease in average speed, so Flow actually begins to decrease.
+We notice that at the critical Occupancies (the Occupancies at which Velocity begins to decrease), the Flow begins to decrease as well. As such, the observer's second claim is false. When Velocity begins to decrase with Occupancy, the increase in total cars does not outweigh the decrease in average speed, so Flow actually begins to decrease.
 
 ---
-*We calculated average velocity by taking Flow/Occ. This calculation gives us the number of cars that pass the detector per 1% coverage time.
-
+*We calculated average velocity by taking Flow/Occ. This calculation gives us the number of cars that pass the detector per 1% coverage time

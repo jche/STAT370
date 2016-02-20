@@ -2,11 +2,15 @@
 title: 'Problem Set #3 - Florence'
 author: "Azka, Jonathan, Jordan"
 date: "Monday, February 15, 2016"
-output: pdf_document
+output: 
+  pdf_document:
+    fig_height: 3
+    fig_width: 5
 ---
 
 ```{r, include=FALSE}
 library(mosaic)
+library(ggplot2)
 ```
 
 # Problem 10.6
@@ -21,7 +25,7 @@ hcarb <- beeswax$Hydrocarbon
 
 hcarb.ecdf <- ecdf(hcarb)
 plot(hcarb.ecdf)
-histogram(hcarb)
+histogram(hcarb, fit="normal")
 ```
 
 ```{r, fig.keep='last'}
@@ -38,39 +42,54 @@ The distribution does appear Gaussian.
 ## Part (b)
 The average percentage of hydrocarbons in microcrystalline wax (a synthetic commercial wax) is 85%. Suppose that beeswax was diluted with 1% microcrystalline wax. Could this be detected? What about a 3% or a 5% dilution?
 
-To help illustrate these dilutions, we plot histograms of the original beeswax compared to histograms of the diluted beeswaxes.
+To help illustrate these dilutions, we plot density plots of the original beeswax compared to density plots of the diluted beeswaxes.
 
 ```{r, fig.keep='none'}
-undiluted <- hist(hcarb)
-synth.01 <- hist(hcarb*.99 + 85*.01)
-synth.03 <- hist(hcarb*.97 + 85*.03)
-synth.05 <- hist(hcarb*.95 + 85*.05)
+undiluted <- data.frame(hcarb)
+undiluted$Dilution <- 'Undiluted'
+
+synth.01 <- data.frame(hcarb*.99 + 85*.01)
+names(synth.01) = "hcarb"
+synth.01$Dilution <- '1% Dilution'
+
+synth.03 <- data.frame(hcarb*.97 + 85*.03)
+names(synth.03) = "hcarb"
+synth.03$Dilution <- '3% Dilution'
+
+synth.05 <- data.frame(hcarb*.95 + 85*.05)
+names(synth.05) = "hcarb"
+synth.05$Dilution <- '5% Dilution'
 ```
 ```{r, fig.keep='last'}
-plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
-plot(synth.01, col=rgb(1,0,0,1/4), xlim=c(11, 21), add = TRUE)
+vs.01 <- rbind(undiluted, synth.01)
+ggplot(vs.01, aes(hcarb, fill = Dilution)) + 
+  geom_density(alpha = 0.2)
 (mean(hcarb*.99 + 85*.01) - mean(hcarb))
 ```
 
-If we examine the mean of the 1% dilutions, we notice that it is only .70 standard deviations away from the mean of the originals, i.e. within 1 standard deviation of the original mean. As the histograms above show, it would be difficult to detect a 1% dilution. 
+If we examine the mean of the 1% dilutions, we notice that it is only .70 standard deviations away from the mean of the originals, i.e. within 1 standard deviation of the original mean. As the density plots above show, it would be difficult to detect a 1% dilution. 
 
 ```{r, fig.keep='last'}
-plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
-plot(synth.03, col=rgb(0,1,0,1/4), xlim=c(11, 21), add = TRUE)
+vs.03 <- rbind(undiluted, synth.03)
+ggplot(vs.03, aes(hcarb, fill = Dilution)) + 
+  geom_density(alpha = 0.2)
 (mean(hcarb*.97 + 85*.03) - mean(hcarb))
 ```
 
-If we examine the mean of the 3% dilutions, we notice that it is 2.11 standard deviations away from the mean of the originals, which is not much more than 2 standard deviations. As the histograms above show, it would be somewhat difficult to detect a 3% dilution.
+If we examine the mean of the 3% dilutions, we notice that it is 2.11 standard deviations away from the mean of the originals, which is not much more than 2 standard deviations. As the density plots above show, it would be somewhat difficult to detect a 3% dilution.
 
 ```{r, fig.keep='last'}
-plot(undiluted, col=rgb(0,0,1,1/4), xlim=c(11, 21), ylim = c(0, 20))
-plot(synth.05, col=rgb(1,1,0,1/4), xlim=c(11, 21), add = TRUE)
+vs.05 <- rbind(undiluted, synth.05)
+ggplot(vs.05, aes(hcarb, fill = Dilution)) + 
+  geom_density(alpha = 0.2)
 (mean(hcarb*.95 + 85*.05) - mean(hcarb))
 ```
 
-If we examine the mean of the 5% dilutions, we notice that it is 3.52 standard deviations away from the mean of the originals, which is more than 3 standard deviations away from the original mean. As the histograms above show, it would be relatively easy to detect a 5% dilution.
+If we examine the mean of the 5% dilutions, we notice that it is 3.52 standard deviations away from the mean of the originals, which is more than 3 standard deviations away from the original mean. As the density plots above show, it would be relatively easy to detect a 5% dilution.
 
 # Problem 10.10
+
+We know a lot about the sampling distribution of the mean. What can we find out about the sampling distribution of the median?
 
 Let's take a sample of size $n$ from a Normal distribution with mean $\mu$ and standard deviation $\sigma$. We want to determine the variance of the sample median and compare it to the variance of the sample mean.
 
@@ -98,7 +117,7 @@ So, the variance of the sample means is `r var(meanVals[,1])`.
 
 If we look at the ratio between the variances, we get `r var(medVals[,1])/var(meanVals[,1])`, which looks suspiciously like $\frac{\pi}{2} \approx 1.571$. In fact, it is $\frac{\pi}{2}$, as we will show with the following (heavily simplified) analytical excursion.
 
-To find the analytical ratio between the variance of the sample median and the sample mean, we first need to find the actual variances of the sample median and the sample mean. Rice gives us a formula for the approximate variance of the kth order statistic (see part (b)). If we plug in k = 50 for the median of a sample of n = 99, we get:
+To find the analytical ratio between the variance of the sample median and the sample mean, we first need to find the actual variances of the sample median and the sample mean. Rice gives us a formula for the approximate variance of the kth order statistic (see part (b)). For a sample of size n = 99, we know that the 50th order statistic is the median. So, we use k = 50:
 
 $$Var(Y_{50}) \approx \frac{1}{2}(1-\frac{1}{2}) (\frac{1}{f (F^{-1}(\frac{1}{2}))^{2}}) (\frac{1}{n})$$
 
@@ -138,10 +157,10 @@ isBetween12 <- function() {
   return(order1<0 & order2>0)
 }
 x <- do(10000) * isBetween12()
-tally(~x, format='prop')
+binom.test(x = tally(~x)[1], n = numsim, )$conf.int[1:2]
 ```
 
-We get an empirical solution of about $\frac{3}{8}$.
+The 95% confidence interval for our empirical solution captures $\frac{3}{8}$.
 
 For the second part:
 $$P(x_{1} < \eta < x_{3}) = 1 - P(\eta < x_{1}) - P(\eta > x_{3})$$
@@ -159,6 +178,6 @@ isBetween13 <- function() {
   return(order1<0 & order3>0)
 }
 x <- do(10000) * isBetween13()
-tally(~x, format='prop')
+binom.test(x = tally(~x)[1], n = numsim, )$conf.int[1:2]
 ```
-We get an empirical solution of about $\frac{3}{4}$.
+The 95% confidence interval for our empirical solution captures $\frac{3}{4}$.
