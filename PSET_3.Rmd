@@ -100,15 +100,21 @@ If we look at the ratio between the variances, we get `r var(medVals[,1])/var(me
 
 To find the analytical ratio between the variance of the sample median and the sample mean, we first need to find the actual variances of the sample median and the sample mean. Rice gives us a formula for the approximate variance of the kth order statistic (see part (b)). If we plug in k = 50 for the median of a sample of n = 99, we get:
 
-$$Var(Y_{50}) \approx \frac{1}{2}(1-\frac{1}{2}) (\frac{1}{f (F^{-1}(\frac{1}{2}))^{2}}) (\frac{1}{101})$$
+$$Var(Y_{50}) \approx \frac{1}{2}(1-\frac{1}{2}) (\frac{1}{f (F^{-1}(\frac{1}{2}))^{2}}) (\frac{1}{n})$$
 
 Because we are using a Normal(0,1), we know that $F^{-1}(1/2)$ is just the mean, which is just the median (See part (a) for more generality). So, we can just substitute in $\mu = 0$.
 
-$$Var(Y_{50}) \approx \frac{1}{2}(1-\frac{1}{2}) (\frac{1}{f (0)^{2}}) (\frac{1}{101})$$
+$$Var(Y_{50}) \approx \frac{1}{2}(1-\frac{1}{2}) (\frac{1}{f (0)^{2}}) (\frac{1}{n})$$
 
 Now, we evaluate the pdf of the Normal(0,1) at 0.
 
-<Insert Latex, probably just original gaussian and final solution>
+$$f_{x}(x) = \frac{1}{\sqrt{2 \pi \sigma}} exp[\frac{-(x-\mu)^{2}}{2\sigma^{2}}]$$
+$$f_{x}(0) = \frac{1}{\sqrt{2 \pi (1)}} exp[\frac{-(0-0)^{2}}{2(1)}] = \frac{1}{\sqrt{2 \pi}}$$
+
+Plugging back in, we get:
+
+$$Var(Y_{50}) \approx \frac{1}{2}(1-\frac{1}{2}) (\frac{1}{(\frac{1}{\sqrt{2 \pi})^{2}}}) (\frac{1}{101})$$
+$$Var(Y_{50}) \approx \frac{1}{2}(\frac{1}{2})(2 \pi) (\frac{1}{n})$$
 
 So, we have found the variance of the median to be $\frac{\pi}{2n}$.
 
@@ -156,95 +162,3 @@ x <- do(10000) * isBetween13()
 tally(~x, format='prop')
 ```
 We get an empirical solution of about $\frac{3}{4}$.
-
-# Problem 10.50
-
-```{r, include=FALSE}
-flow <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/flow-occ.csv")
-```
-
-## Part (a)
-For each station, plot flow and occupancy versus time. Explain the patterns you see. Can you deduce from the plots what the days of the week were?
-
-```{r, fig.keep='none'}
-p1 = xyplot(Lane.1.Flow ~ Timestamp, data=flow)
-p2 = xyplot(Lane.1.Occ ~ Timestamp, data=flow)
-print(p1, position = c(0, 0.5, 1, 1), more = TRUE)
-print(p2, position = c(0, 0, 1, 0.5))
-```
-
-```{r, fig.keep='none'}
-p3 = xyplot(Lane.2.Flow ~ Timestamp, data=flow)
-p4 = xyplot(Lane.2.Occ ~ Timestamp, data=flow)
-print(p3, position = c(0, 0.5, 1, 1), more = TRUE)
-print(p4, position = c(0, 0, 1, 0.5))
-```
-
-```{r, fig.keep='none'}
-p5 = xyplot(Lane.3.Flow ~ Timestamp, data=flow)
-p6 = xyplot(Lane.3.Occ ~ Timestamp, data=flow)
-print(p5, position = c(0, 0.5, 1, 1), more = TRUE)
-print(p6, position = c(0, 0, 1, 0.5))
-```
-
-There is a sin-curve-like pattern to the plots. The second and third "bumps" look to be slightly less variable than the other bumps, so the days of the week could be Friday, Saturday, Sunday, Monday, Tuesday, Wednesday.
-
-## Part (b)
-Compare the flows in the three lanes by making parallel boxplots. Which lane typically serves the most traffic?
-
-```{r, fig.keep='none'}
-boxplot(flow$Lane.1.Flow, flow$Lane.2.Flow, flow$Lane.3.Flow, names = c("Lane 1", "Lane 2", "Lane 3"))
-```
-
-Lane 2 typically serves the most traffic.
-
-## Part (c)
-
-```{r, fig.keep='none'}
-xyplot(Lane.1.Flow + Lane.2.Flow + Lane.3.Flow ~ Timestamp, data=flow, auto.key = TRUE)
-```
-
-The flow in lane 2 looks to typically be greater than the flow in lane 1, which looks to typically by greater than the flow in lane 3.
-
-## Part (d)
-
-```{r}
-mean(flow$Lane.1.Occ); median(flow$Lane.1.Occ)
-mean(flow$Lane.2.Occ); median(flow$Lane.2.Occ)
-mean(flow$Lane.3.Occ); median(flow$Lane.3.Occ)
-```
-
-In all three lanes, the medians are less than the means. This suggests that the data are skewed right, with some high-valued outliers that increase the mean.
-
-## Part (e)
-
-```{r, fig.keep='none'}
-histogram(flow$Lane.1.Occ, breaks = 10)
-histogram(flow$Lane.1.Occ, breaks = 20)
-
-histogram(flow$Lane.2.Occ, breaks = 10)
-histogram(flow$Lane.2.Occ, breaks = 20)
-
-histogram(flow$Lane.3.Occ, breaks = 10)
-histogram(flow$Lane.3.Occ, breaks = 20)
-```
-
-20 bins looks to give a good representation of the shape of the distribution (skewed right, slightly bimodal). The bimodal nature can be explained by rush hours. Most of the time, when traffic is light, cars do not occupy the same area for very long. Sometimes, though, when traffic is heavy, cars tend to occupy the same area for longer times.
-
-## Part (f)
-
-```{r, fig.keep='none'}
-xyplot(Lane.1.Occ + Lane.2.Occ + Lane.3.Occ ~ Timestamp, data=flow, auto.key = TRUE)
-```
-
-From this plot, we can tell that all 3 lanes tend to have high occupancies at around the same times.
-
-## Part (g)
-
-```{r, fig.keep='none'}
-xyplot(Lane.1.Flow ~ Lane.1.Occ, data = flow)
-xyplot(Lane.2.Flow ~ Lane.2.Occ, data = flow)
-xyplot(Lane.3.Flow ~ Lane.3.Occ, data = flow)
-```
-
-The first part of the conjecture seems plausible. When occupancy is low, it tends to increase with flow. Beyond a certain point (around Occ=0.2), however, flow begins to decrease with greater occupancy.

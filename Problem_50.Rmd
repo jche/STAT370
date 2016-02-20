@@ -1,0 +1,104 @@
+---
+title: "Problem 10.50"
+author: "Azka, Jonathan, Jordan"
+date: "Saturday, February 20, 2016"
+output: pdf_document
+---
+
+Instead of answering all of the questions for 10.50, I am asking each group to provide an data-based response to the following statement: 
+
+“When very few cars are on the road, flow is small and so is congestion. Adding a few more cars may increase congestion but not enough so that velocity is decreased, so flow will also increase. The congestion will spread from one lane to the others.  Beyond some point, increasing occupancy (congestion) will decrease velocity, but since there will then be more cars in total, flow will still continue to increase.”
+
+Please segregate your preliminary analyses and data derivation in a separate R Markdown file or by using "include=FALSE" in your final analysis file. Your solution should consist of no more than two pages of output that serves as the executive summary that uses a few plots and some text to explain what happened on this highway during this time period. The intended audience is a manager will little background in statistics, so minimal jargon should be used.
+
+# Problem 10.50
+
+```{r, include=FALSE}
+flow <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/flow-occ.csv")
+```
+
+## Part (a)
+For each station, plot flow and occupancy versus time. Explain the patterns you see. Can you deduce from the plots what the days of the week were?
+
+```{r, fig.keep='none'}
+p1 = xyplot(Lane.1.Flow ~ Timestamp, data=flow)
+p2 = xyplot(Lane.1.Occ ~ Timestamp, data=flow)
+print(p1, position = c(0, 0.5, 1, 1), more = TRUE)
+print(p2, position = c(0, 0, 1, 0.5))
+```
+
+```{r, fig.keep='none'}
+p3 = xyplot(Lane.2.Flow ~ Timestamp, data=flow)
+p4 = xyplot(Lane.2.Occ ~ Timestamp, data=flow)
+print(p3, position = c(0, 0.5, 1, 1), more = TRUE)
+print(p4, position = c(0, 0, 1, 0.5))
+```
+
+```{r, fig.keep='none'}
+p5 = xyplot(Lane.3.Flow ~ Timestamp, data=flow)
+p6 = xyplot(Lane.3.Occ ~ Timestamp, data=flow)
+print(p5, position = c(0, 0.5, 1, 1), more = TRUE)
+print(p6, position = c(0, 0, 1, 0.5))
+```
+
+There is a sin-curve-like pattern to the plots. The second and third "bumps" look to be slightly less variable than the other bumps, so the days of the week could be Friday, Saturday, Sunday, Monday, Tuesday, Wednesday.
+
+## Part (b)
+Compare the flows in the three lanes by making parallel boxplots. Which lane typically serves the most traffic?
+
+```{r, fig.keep='none'}
+boxplot(flow$Lane.1.Flow, flow$Lane.2.Flow, flow$Lane.3.Flow, names = c("Lane 1", "Lane 2", "Lane 3"))
+```
+
+Lane 2 typically serves the most traffic.
+
+## Part (c)
+
+```{r, fig.keep='none'}
+xyplot(Lane.1.Flow + Lane.2.Flow + Lane.3.Flow ~ Timestamp, data=flow, auto.key = TRUE)
+```
+
+The flow in lane 2 looks to typically be greater than the flow in lane 1, which looks to typically by greater than the flow in lane 3.
+
+## Part (d)
+
+```{r}
+mean(flow$Lane.1.Occ); median(flow$Lane.1.Occ)
+mean(flow$Lane.2.Occ); median(flow$Lane.2.Occ)
+mean(flow$Lane.3.Occ); median(flow$Lane.3.Occ)
+```
+
+In all three lanes, the medians are less than the means. This suggests that the data are skewed right, with some high-valued outliers that increase the mean.
+
+## Part (e)
+
+```{r, fig.keep='none'}
+histogram(flow$Lane.1.Occ, breaks = 10)
+histogram(flow$Lane.1.Occ, breaks = 20)
+
+histogram(flow$Lane.2.Occ, breaks = 10)
+histogram(flow$Lane.2.Occ, breaks = 20)
+
+histogram(flow$Lane.3.Occ, breaks = 10)
+histogram(flow$Lane.3.Occ, breaks = 20)
+```
+
+20 bins looks to give a good representation of the shape of the distribution (skewed right, slightly bimodal). The bimodal nature can be explained by rush hours. Most of the time, when traffic is light, cars do not occupy the same area for very long. Sometimes, though, when traffic is heavy, cars tend to occupy the same area for longer times.
+
+## Part (f)
+
+```{r, fig.keep='none'}
+xyplot(Lane.1.Occ + Lane.2.Occ + Lane.3.Occ ~ Timestamp, data=flow, auto.key = TRUE)
+```
+
+From this plot, we can tell that all 3 lanes tend to have high occupancies at around the same times.
+
+## Part (g)
+
+```{r, fig.keep='none'}
+xyplot(Lane.1.Flow ~ Lane.1.Occ, data = flow)
+xyplot(Lane.2.Flow ~ Lane.2.Occ, data = flow)
+xyplot(Lane.3.Flow ~ Lane.3.Occ, data = flow)
+```
+
+The first part of the conjecture seems plausible. When occupancy is low, it tends to increase with flow. Beyond a certain point (around Occ=0.2), however, flow begins to decrease with greater occupancy.
