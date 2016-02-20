@@ -8,6 +8,7 @@ output: pdf_document
 ```{r, include=FALSE}
 library(dplyr)
 library(Hmisc)
+# opts_chunk$set(fig.height=2))
 flow <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/flow-occ.csv")
 ```
 
@@ -29,7 +30,7 @@ The claim says that initially, when only a few cars are on the road, increasing 
 
 The graphs below show that Velocity* remains about constant until the red lines, at which point they begin to decrease with Occupancy. So, the above claim holds true.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=6}
 par(mfrow=c(3,1))
 plot(Lane.1.Vel ~ Lane.1.Occ, data=flow)
 abline(v = .15, col = "red")
@@ -41,13 +42,11 @@ abline(v = .1, col = "red")
 
 If we look at the three plots, we notice that it takes a greater Occupancy for the average velocity of Lane 1 to begin to decrease (.15 as opposed to .1 for Lanes 2 and 3). This is because Lane 1 is the lane that is the farthest to the left, i.e. the passing lane.
 
-\newpage
-
 Next, the given claim says that even though Velocity begins to decrease with Occupancy after a certain point, the increase in total cars means that the flow still continues to increase. 
 
 To check this claim, we plot Flow against Occupancy, noting the Occupancy values at which Velocity begins to decrease with Occupancy.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=6.5}
 par(mfrow=c(3,1))
 plot(Lane.1.Flow ~ Lane.1.Occ, data=flow)
 abline(v = .15, col = "red")
