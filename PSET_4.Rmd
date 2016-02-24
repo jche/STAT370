@@ -1,0 +1,30 @@
+---
+title: "Problem Set 4"
+author: "Caleb, Jonathan, Levi"
+date: "Tuesday, February 23, 2016"
+output: pdf_document
+---
+
+# Problem 15
+
+You take numsim samples of size n from a gamma distribution with parameters $\hat{\alpha}$ and $\hat{\lambda}$ and find the upper quartile of each sample. You use the standard deviation of these numsim samples as the estimation of the standard error of $q_hat$.
+
+# Problem 17
+
+## Part (a)
+
+Plot various density curves for different values of alpha.
+
+## Part (b)
+
+Sample from the distribution (with some given alpha), find $\mu_2$, and plug into derived formula to get $\hat{\alpha}$
+
+## Part (c)
+
+## Part (d)
+
+Asymptotic variance formula given on page 277.
+
+## Part (e)
+
+Sufficient statistic formula given on page 306.
