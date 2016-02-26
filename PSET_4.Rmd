@@ -9,11 +9,63 @@ output: pdf_document
 
 You take numsim samples of size n from a gamma distribution with parameters $\hat{\alpha}$ and $\hat{\lambda}$ and find the upper quartile of each sample. You use the standard deviation of these numsim samples as the estimation of the standard error of $q_hat$.
 
+```{r}
+library(dplyr)
+library(mosaic)
+
+data60 <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/Illinois60.csv")
+names(data60)[1] <- "rain"
+data61 <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/Illinois61.csv")
+names(data61)[1] <- "rain"
+data62 <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/Illinois62.csv")
+names(data62)[1] <- "rain"
+data63 <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/Illinois63.csv")
+names(data63)[1] <- "rain"
+data64 <- read.csv("http://www3.amherst.edu/~nhorton/rice/chapter10/Illinois64.csv")
+names(data64)[1] <- "rain"
+
+rain <- rbind(data60, data61, data62, data63, data64)
+```
+
+```{r}
+numsim <- 10000
+
+findQuant <- function(quantile){
+  x <- sample(rain$rain, size = length(rain$rain), replace = TRUE)
+  return(quantile(x, quantile)[[1]])
+}
+
+quants <- do(numsim)*findQuant(.75) # Generating observations of sample quantiles
+sd(quants$findQuant)
+
+histogram(~findQuant, data=quants, breaks = 15, type = "density", fit = "normal")
+
+quantile(rain$rain, .75)
+confint(quants$findQuant, level = .95)
+```
+
+```{r, fig.keep='last'}
+xbar <- mean(rain$rain)
+sigma <- sd(rain$rain)*221/222 #comment, etc.
+qgamma(.75, shape = xbar^2/sigma^2, rate = xbar/sigma^2)
+hist(rain$rain, prob=TRUE, main = "Histogram of Rain", xlab = "Inches of Rain")
+curve(dgamma(x, shape = xbar^2/sigma^2, rate = xbar/sigma^2), col = "blue", add = TRUE)
+abline(v = qgamma(.75, shape = xbar^2/sigma^2, rate = xbar/sigma^2), col = "red")
+```
+
+
 # Problem 17
 
 ## Part (a)
 
 Plot various density curves for different values of alpha.
+
+```{r, fig.keep='last'}
+curve(dbeta(x, 6, 6))
+curve(dbeta(x, 4, 4), add=TRUE)
+curve(dbeta(x, 2, 2), add=TRUE)
+```
+
 
 ## Part (b)
 
